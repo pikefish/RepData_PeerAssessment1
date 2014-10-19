@@ -1,6 +1,12 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: 'Reproducible Research: Peer Assessment 1'
+output:
+  pdf_document: default
+  html_document:
+    keep_md: yes
+---
 
-*Created* Sun Oct 19 18:29:19 2014
+*Created* Sun Oct 19 18:46:08 2014
 
 ## Loading and preprocessing the data
 Load all required libraries
@@ -101,7 +107,7 @@ hist(total$totalSteps, col = "steelblue", main = "Total number of steps per day"
      xlab = "Number of steps", breaks = 12)
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
 
 For comparison, let's remove missing values while computing
 
@@ -137,7 +143,7 @@ hist(total0$totalSteps, col = "steelblue",
      xlab = "Number of steps", breaks = 12)
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 ```r
 par(mfrow = c(1, 1))
@@ -205,7 +211,7 @@ with(average, plot(interval, meanSteps, type = "l", xlab = "Interval",
                    main = "Averge number of steps taken per interval"))
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png) 
 
 Which 5-minute interval, on average across all the days in the dataset, contains
 the maximum number of steps?
@@ -306,7 +312,7 @@ hist(total1$totalSteps, col = "steelblue",
      xlab = "Number of steps", breaks = 12, ylim = c(0,25))
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-21-1.png) 
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21-1.png) 
 
 ```r
 par(mfrow = c(1, 1))
@@ -456,4 +462,4 @@ xyplot(meanSteps ~ interval | day, data = average1,
        main = "Averge number of steps taken per interval")
 ```
 
-![](./PA1_template_files/figure-html/unnamed-chunk-31-1.png) 
+![plot of chunk unnamed-chunk-31](figure/unnamed-chunk-31-1.png) 
