@@ -1,6 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
-*Created* Sun Oct 19 17:37:26 2014
+*Created* Sun Oct 19 18:29:19 2014
 
 ## Loading and preprocessing the data
 Load all required libraries
@@ -10,7 +10,7 @@ library(data.table)
 library(lattice)
 ```
 
-Create **data** folder in your workspace (if there is no such folder) download the original .zip file and store it in the **data** folder.
+Create **data** folder in your workspace (if there is no such folder), download the original zip file and store it in the **data** folder.
 
 ```r
 if (!file.exists("data")){
@@ -22,7 +22,7 @@ if (!file.exists("./data/activity.zip")){
 }
 ```
 
-Read data from the .zip file and store it as a data table `activity`
+Read data from the zip file and store it as a data table `activity`
 
 ```r
 activity <- read.csv(unz("./data/activity.zip", "activity.csv"), header = TRUE)
@@ -44,8 +44,8 @@ summary(activity)
 ```
 
 ## What is mean total number of steps taken per day?
-What is interesting, that all `NA` values belong to the `steps` variable and, what is more interesting, *for each date* the following property holds:
-*The variable* `steps` *has at least one missing value if and only if all its values for that day are missing. There are exactly 8 such days.*  Let's call such days *NA days*.
+As one can see, all `NA` values in the dataset belong to the `steps` variable. What is more interesting, the following property holds:
+*For any date, the variable* `steps` *has at least one missing value* **if and only if** *all its values for that day are missing. There are exactly 8 such days in the dataset.*  Let's call such days *NA days*.
 
 One can have a look at
 
@@ -143,7 +143,7 @@ hist(total0$totalSteps, col = "steelblue",
 par(mfrow = c(1, 1))
 ```
 
-Find the mean and median total number of steps taken per day. Actually, we have already know them form the summary, yet let's compute them again
+Find the mean and median total number of steps taken per day. Actually, we have already know them from the summary, yet let's compute them again
 
 ```r
 mean(total$totalSteps)
@@ -161,7 +161,7 @@ median(total$totalSteps)
 ## [1] 10765
 ```
 
-Again, see the difference if we take *NA days* into account
+Again, see the difference if keep *NA days* in the dataset
 
 ```r
 mean(total0$totalSteps)
@@ -239,7 +239,7 @@ length(which(is.na(activity$steps)))
 ```
 
 ## Imputing missing values
-We know that each day that contains at lest one missing, contains only missing values. Therefore, the strategy *"use the mean/median for that day"* won't work. Let's use the strategy *"the mean for that 5-minute interval"* to impute missing values.
+We know that if steps observations for any day contain at lest one missing value, they consist of missing values only. Therefore, the strategy *"use the mean/median for that day"* won't work. Let's use the strategy *"the mean for that 5-minute interval"* to impute missing values.
 
 Using **data.table package**, set key `interval` to both the original `activity` data set and the date `average` that stores the mean total number of steps per interval. Merge the data tables and replace missing values of the variable `steps` with average values from the `meanSteps` . However, first we create a new copy of the `activity` data table.
 
@@ -249,6 +249,7 @@ setkey(activity1, interval)
 setkey(average, interval)
 activity1 <- merge(activity1, average)
 activity1[is.na(steps), steps := meanSteps]
+activity1[, meanSteps := NULL]
 ```
 
 
@@ -257,13 +258,29 @@ summary(activity1)
 ```
 
 ```
-##     interval          steps             date              meanSteps      
-##  Min.   :   0.0   Min.   :  0.00   Min.   :2012-10-01   Min.   :  0.000  
-##  1st Qu.: 588.8   1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.:  2.486  
-##  Median :1177.5   Median :  0.00   Median :2012-10-31   Median : 34.113  
-##  Mean   :1177.5   Mean   : 37.38   Mean   :2012-10-31   Mean   : 37.383  
-##  3rd Qu.:1766.2   3rd Qu.: 27.00   3rd Qu.:2012-11-15   3rd Qu.: 52.835  
-##  Max.   :2355.0   Max.   :806.00   Max.   :2012-11-30   Max.   :206.170
+##     interval          steps             date           
+##  Min.   :   0.0   Min.   :  0.00   Min.   :2012-10-01  
+##  1st Qu.: 588.8   1st Qu.:  0.00   1st Qu.:2012-10-16  
+##  Median :1177.5   Median :  0.00   Median :2012-10-31  
+##  Mean   :1177.5   Mean   : 37.38   Mean   :2012-10-31  
+##  3rd Qu.:1766.2   3rd Qu.: 27.00   3rd Qu.:2012-11-15  
+##  Max.   :2355.0   Max.   :806.00   Max.   :2012-11-30
+```
+
+```r
+head(activity1, 8)
+```
+
+```
+##    interval     steps       date
+## 1:        0  1.716981 2012-10-01
+## 2:        0  0.000000 2012-10-02
+## 3:        0  0.000000 2012-10-03
+## 4:        0 47.000000 2012-10-04
+## 5:        0  0.000000 2012-10-05
+## 6:        0  0.000000 2012-10-06
+## 7:        0  0.000000 2012-10-07
+## 8:        0  1.716981 2012-10-08
 ```
 
 As you can see, all missing values have disappeared.
@@ -274,15 +291,18 @@ Calculate the total number of steps taken each day
 total1 <- activity1[, list(totalSteps = sum(steps)), by = date]
 ```
 
-Make a histogram of the total number of steps taken each day. Below are comparison plots. Old data is without *NA days* (if we include *NA days*, we will have 8 extra 0-steps days)
+Make a histogram of the total number of steps taken each day. Below are comparison plots. Old data is without *NA days* 
 
 ```r
-par(mfrow = c(1, 2))
+par(mfrow = c(3, 1))
 hist(total$totalSteps, col = "steelblue", 
-     main = "Total number of steps per day \n(without NA days)", 
+     main = "Total number of steps per day (without NA days)", 
+     xlab = "Number of steps", breaks = 12, ylim = c(0,25))
+hist(total0$totalSteps, col = "steelblue", 
+     main = "Total number of steps per day (with NA days)", 
      xlab = "Number of steps", breaks = 12, ylim = c(0,25))
 hist(total1$totalSteps, col = "steelblue", 
-     main = "Total number of steps per day \n(imputed NA values)", 
+     main = "Total number of steps per day (imputed NA values)", 
      xlab = "Number of steps", breaks = 12, ylim = c(0,25))
 ```
 
@@ -291,6 +311,8 @@ hist(total1$totalSteps, col = "steelblue",
 ```r
 par(mfrow = c(1, 1))
 ```
+
+From the graph one can see that after we imputed missing values with estimates, 8 artificial 0-steps days have transformed into "post popular" days with approximately 11k steps.
 
 Find again the mean and median total number of steps taken per day
 
@@ -311,7 +333,7 @@ median(total1$totalSteps)
 ```
 and compare them with the old values.
 
-Here the old values from the data set without *NA days*
+The old values obtained from the data set without *NA days*
 
 ```r
 mean(total$totalSteps)
@@ -329,9 +351,9 @@ median(total$totalSteps)
 ## [1] 10765
 ```
 
-Result: Clearly, and as one could expect, our initial strategy with removing *NA days* from the  data set gave us almost the same results as the strategy that replaces each missing value with the mean value of steps for a corresponding interval.
+**Result**: Clearly, and as one could expect, our initial strategy with removing *NA days* from the  data set gave us essentially the same results as the strategy that replaces each missing value with the mean value of steps for a corresponding interval.
 
-Here the old values obtained from the data set that includes *NA days*
+The old values obtained from the data set that includes *NA days*
 
 ```r
 mean(total0$totalSteps)
@@ -349,9 +371,9 @@ median(total0$totalSteps)
 ## [1] 10395
 ```
 
-Result: If we compare results obtained from the new data set and the original one that 
-includes NA days, the difference is pretty significant. Clearly, once we replace `NA`s with
-estimates and run our analysis, we won't get 0 total steps for 8 *NA days*. Instead, we will get some positive values calculated from the estimates. As a result, both the **mean** and **median** total number number of steps per day have increased.
+**Result**: If we compare results obtained from the new data set and the original one that 
+includes NA days, the difference is pretty significant. Clearly, once we replace `NAs` with
+estimates and run our analysis, we won't get 0 total steps for 8 *NA days*. Instead, we will get some positive values calculated from the estimates. As a result, both the **mean** and **median** total number of steps per day have increased.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 Create a new factor variable in the dataset with two levels – "weekday" and "weekend"
@@ -367,15 +389,15 @@ head(activity1, 8)
 ```
 
 ```
-##    interval     steps       date meanSteps     day
-## 1:        0  1.716981 2012-10-01  1.716981      NA
-## 2:        0  0.000000 2012-10-02  1.716981      NA
-## 3:        0  0.000000 2012-10-03  1.716981      NA
-## 4:        0 47.000000 2012-10-04  1.716981      NA
-## 5:        0  0.000000 2012-10-05  1.716981      NA
-## 6:        0  0.000000 2012-10-06  1.716981 weekend
-## 7:        0  0.000000 2012-10-07  1.716981 weekend
-## 8:        0  1.716981 2012-10-08  1.716981      NA
+##    interval     steps       date     day
+## 1:        0  1.716981 2012-10-01      NA
+## 2:        0  0.000000 2012-10-02      NA
+## 3:        0  0.000000 2012-10-03      NA
+## 4:        0 47.000000 2012-10-04      NA
+## 5:        0  0.000000 2012-10-05      NA
+## 6:        0  0.000000 2012-10-06 weekend
+## 7:        0  0.000000 2012-10-07 weekend
+## 8:        0  1.716981 2012-10-08      NA
 ```
 
 
@@ -389,15 +411,15 @@ head(activity1, 8)
 ```
 
 ```
-##    interval     steps       date meanSteps     day
-## 1:        0  1.716981 2012-10-01  1.716981 weekday
-## 2:        0  0.000000 2012-10-02  1.716981 weekday
-## 3:        0  0.000000 2012-10-03  1.716981 weekday
-## 4:        0 47.000000 2012-10-04  1.716981 weekday
-## 5:        0  0.000000 2012-10-05  1.716981 weekday
-## 6:        0  0.000000 2012-10-06  1.716981 weekend
-## 7:        0  0.000000 2012-10-07  1.716981 weekend
-## 8:        0  1.716981 2012-10-08  1.716981 weekday
+##    interval     steps       date     day
+## 1:        0  1.716981 2012-10-01 weekday
+## 2:        0  0.000000 2012-10-02 weekday
+## 3:        0  0.000000 2012-10-03 weekday
+## 4:        0 47.000000 2012-10-04 weekday
+## 5:        0  0.000000 2012-10-05 weekday
+## 6:        0  0.000000 2012-10-06 weekend
+## 7:        0  0.000000 2012-10-07 weekend
+## 8:        0  1.716981 2012-10-08 weekday
 ```
 
 

@@ -17,7 +17,7 @@ library(data.table)
 library(lattice)
 ```
 
-Create **data** folder in your workspace (if there is no such folder) download the original .zip file and store it in the **data** folder.
+Create **data** folder in your workspace (if there is no such folder), download the original zip file and store it in the **data** folder.
 ```{r}
 if (!file.exists("data")){
         dir.create("data")
@@ -28,7 +28,7 @@ if (!file.exists("./data/activity.zip")){
 }
 ```
 
-Read data from the .zip file and store it as a data table `activity`
+Read data from the zip file and store it as a data table `activity`
 ```{r}
 activity <- read.csv(unz("./data/activity.zip", "activity.csv"), header = TRUE)
 activity <- as.data.table(activity)
@@ -38,8 +38,8 @@ summary(activity)
 ```
 
 ## What is mean total number of steps taken per day?
-What is interesting, that all `NA` values belong to the `steps` variable and, what is more interesting, *for each date* the following property holds:
-*The variable* `steps` *has at least one missing value if and only if all its values for that day are missing. There are exactly 8 such days.*  Let's call such days *NA days*.
+As one can see, all `NA` values in the dataset belong to the `steps` variable. What is more interesting, the following property holds:
+*For any date, the variable* `steps` *has at least one missing value* **if and only if** *all its values for that day are missing. There are exactly 8 such days in the dataset.*  Let's call such days *NA days*.
 
 One can have a look at
 ```{r, echo = TRUE, results = "hide" }
@@ -92,13 +92,13 @@ hist(total0$totalSteps, col = "steelblue",
 par(mfrow = c(1, 1))
 ```
 
-Find the mean and median total number of steps taken per day. Actually, we have already know them form the summary, yet let's compute them again
+Find the mean and median total number of steps taken per day. Actually, we have already know them from the summary, yet let's compute them again
 ```{r}
 mean(total$totalSteps)
 median(total$totalSteps)
 ```
 
-Again, see the difference if we take *NA days* into account
+Again, see the difference if keep *NA days* in the dataset
 ```{r}
 mean(total0$totalSteps)
 median(total0$totalSteps)
@@ -135,7 +135,7 @@ length(which(is.na(activity$steps)))
 ```
 
 ## Imputing missing values
-We know that each day that contains at lest one missing, contains only missing values. Therefore, the strategy *"use the mean/median for that day"* won't work. Let's use the strategy *"the mean for that 5-minute interval"* to impute missing values.
+We know that if steps observations for any day contain at lest one missing value, they consist of missing values only. Therefore, the strategy *"use the mean/median for that day"* won't work. Let's use the strategy *"the mean for that 5-minute interval"* to impute missing values.
 
 Using **data.table package**, set key `interval` to both the original `activity` data set and the date `average` that stores the mean total number of steps per interval. Merge the data tables and replace missing values of the variable `steps` with average values from the `meanSteps` . However, first we create a new copy of the `activity` data table.
 ```{r, results = "hide"}
@@ -144,10 +144,12 @@ setkey(activity1, interval)
 setkey(average, interval)
 activity1 <- merge(activity1, average)
 activity1[is.na(steps), steps := meanSteps]
+activity1[, meanSteps := NULL]
 ```
 
 ```{r}
 summary(activity1)
+head(activity1, 8)
 ```
 
 As you can see, all missing values have disappeared.
@@ -157,17 +159,22 @@ Calculate the total number of steps taken each day
 total1 <- activity1[, list(totalSteps = sum(steps)), by = date]
 ```
 
-Make a histogram of the total number of steps taken each day. Below are comparison plots. Old data is without *NA days* (if we include *NA days*, we will have 8 extra 0-steps days)
-```{r}
-par(mfrow = c(1, 2))
+Make a histogram of the total number of steps taken each day. Below are comparison plots. Old data is without *NA days* 
+```{r, fig.height = 10}
+par(mfrow = c(3, 1))
 hist(total$totalSteps, col = "steelblue", 
-     main = "Total number of steps per day \n(without NA days)", 
+     main = "Total number of steps per day (without NA days)", 
+     xlab = "Number of steps", breaks = 12, ylim = c(0,25))
+hist(total0$totalSteps, col = "steelblue", 
+     main = "Total number of steps per day (with NA days)", 
      xlab = "Number of steps", breaks = 12, ylim = c(0,25))
 hist(total1$totalSteps, col = "steelblue", 
-     main = "Total number of steps per day \n(imputed NA values)", 
+     main = "Total number of steps per day (imputed NA values)", 
      xlab = "Number of steps", breaks = 12, ylim = c(0,25))
 par(mfrow = c(1, 1))
 ```
+
+From the graph one can see that after we imputed missing values with estimates, 8 artificial 0-steps days have transformed into "post popular" days with approximately 11k steps.
 
 Find again the mean and median total number of steps taken per day
 ```{r}
@@ -176,23 +183,23 @@ median(total1$totalSteps)
 ```
 and compare them with the old values.
 
-Here the old values from the data set without *NA days*
+The old values obtained from the data set without *NA days*
 ```{r}
 mean(total$totalSteps)
 median(total$totalSteps)
 ```
 
-Result: Clearly, and as one could expect, our initial strategy with removing *NA days* from the  data set gave us almost the same results as the strategy that replaces each missing value with the mean value of steps for a corresponding interval.
+**Result**: Clearly, and as one could expect, our initial strategy with removing *NA days* from the  data set gave us essentially the same results as the strategy that replaces each missing value with the mean value of steps for a corresponding interval.
 
-Here the old values obtained from the data set that includes *NA days*
+The old values obtained from the data set that includes *NA days*
 ```{r}
 mean(total0$totalSteps)
 median(total0$totalSteps)
 ```
 
-Result: If we compare results obtained from the new data set and the original one that 
+**Result**: If we compare results obtained from the new data set and the original one that 
 includes NA days, the difference is pretty significant. Clearly, once we replace `NAs` with
-estimates and run our analysis, we won't get 0 total steps for 8 *NA days*. Instead, we will get some positive values calculated from the estimates. As a result, both the **mean** and **median** total number number of steps per day have increased.
+estimates and run our analysis, we won't get 0 total steps for 8 *NA days*. Instead, we will get some positive values calculated from the estimates. As a result, both the **mean** and **median** total number of steps per day have increased.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 Create a new factor variable in the dataset with two levels – "weekday" and "weekend"
