@@ -1,12 +1,12 @@
 ---
 title: 'Reproducible Research: Peer Assessment 1'
 output:
-  pdf_document: default
   html_document:
     keep_md: yes
+  pdf_document: default
 ---
 
-*Created* Sun Oct 19 18:46:08 2014
+*Created* Sun Oct 19 18:52:27 2014
 
 ## Loading and preprocessing the data
 Load all required libraries
@@ -104,7 +104,7 @@ Make a histogram of the total number of steps taken each day
 
 ```r
 hist(total$totalSteps, col = "steelblue", main = "Total number of steps per day", 
-     xlab = "Number of steps", breaks = 12)
+     xlab = "Number of steps", ylim = c(0,20), breaks = 12)
 ```
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
@@ -137,10 +137,10 @@ Now compare the plots: the right one has eight more 0-days
 par(mfrow = c(1, 2))
 hist(total$totalSteps, col = "steelblue", 
      main = "Total number of steps per day \n(without NA days)", 
-     xlab = "Number of steps", breaks = 12)
+     xlab = "Number of steps", ylim = c(0,20), breaks = 12)
 hist(total0$totalSteps, col = "steelblue", 
      main = "Total number of steps per day \n(with NA days)", 
-     xlab = "Number of steps", breaks = 12)
+     xlab = "Number of steps", ylim = c(0,20), breaks = 12)
 ```
 
 ![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
@@ -318,7 +318,7 @@ hist(total1$totalSteps, col = "steelblue",
 par(mfrow = c(1, 1))
 ```
 
-From the graph one can see that after we imputed missing values with estimates, 8 artificial 0-steps days have transformed into "post popular" days with approximately 11k steps.
+From the graph one can see that after we imputed missing values with estimates, 8 artificial 0-steps days have transformed into "most popular" days with approximately 11k steps.
 
 Find again the mean and median total number of steps taken per day
 
